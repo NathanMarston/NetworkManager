@@ -8,4 +8,8 @@
     <PackageReference Include="log4net" Version="2.0.8" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NetworkManager.Common\NetworkManager.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-
-namespace NetworkManager.Model.Topology
+﻿namespace NetworkManager.Model.Topology
 {
     public class DeviceType
     {
         /// <summary>
-        /// A unique ID for the device, within a network model.
+        /// A unique ID for the device type, within a network model.
         /// </summary>
         /// <value>The identifier.</value>
         public ulong Id { get; internal set; }

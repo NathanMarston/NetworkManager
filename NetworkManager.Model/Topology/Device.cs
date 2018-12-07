@@ -13,7 +13,7 @@ namespace NetworkManager.Model.Topology
         public NetworkTopology Parent { get; internal set; }
 
         /// <summary>
-        /// Unique ID for a device type
+        /// Unique ID for a device
         /// </summary>
         public ulong Id { get; internal set; }
 
