@@ -113,6 +113,7 @@ namespace NetworkManager.TopologyBuilder
                 var deviceTypes = LoadDeviceTypes(connection);
                 topology.Add(LoadDevices(connection, deviceTypes));
                 topology.Connect(LoadEdges(connection));
+                topology.EnergizeNetwork();
 
                 using (var fs = new FileStream(ConfigurationManager.AppSettings["NetworkTopologyPath"], FileMode.Create))
                 {

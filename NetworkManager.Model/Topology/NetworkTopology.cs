@@ -22,11 +22,7 @@ namespace NetworkManager.Model.Topology
         /// log4net logger
         /// </summary>
         private static readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        /// <summary>
-        /// The devices, keyed by ID
-        /// </summary>
-        private readonly Dictionary<ulong, Device> _devices = new Dictionary<ulong, Device>();
+        public Dictionary<ulong, Device> Devices { get; } = new Dictionary<ulong, Device>();
 
         /// <summary>
         /// The generators
@@ -95,11 +91,11 @@ namespace NetworkManager.Model.Topology
                 "Not all active generators have been energized!");
 
             // All devices in the open state are de-energized
-            Contract.Assert(_devices.Values.Where(d => !canConduct(d)).All(d => !isEnergized(d)),
+            Contract.Assert(Devices.Values.Where(d => !canConduct(d)).All(d => !isEnergized(d)),
                 "Not all open devices are de-energized!");
 
             // For each pair of adjacent, conducting devices, either both devices are energized or both devices are de-energized
-            Contract.Assert(_devices.Values.AsParallel().Where(d => canConduct(d)).
+            Contract.Assert(Devices.Values.AsParallel().Where(d => canConduct(d)).
                 SelectMany(d => d.AdjacentDevices.Where(ad => canConduct(ad)), (d, ad) => new Tuple<Device, Device>(d, ad)).
                 All(x => isEnergized(x.Item1) == isEnergized(x.Item2)),
                 "Inconsistent network energization detected!");
@@ -123,7 +119,7 @@ namespace NetworkManager.Model.Topology
             {
                 // De-energize everything
                 Parallel.ForEach(
-                    _devices.Values,
+                    Devices.Values,
                     d => d.IsEnergized = false);
 
                 // Energize everything that's electrically reachable from the active generators on the network
@@ -151,7 +147,7 @@ namespace NetworkManager.Model.Topology
             {
                 foreach (var device in devices)
                 {
-                    _devices.Add(device.Id, device);
+                    Devices.Add(device.Id, device);
                     if (device.Type.IsGenerator) _generators.Add(device);
                 }
             }
@@ -167,7 +163,7 @@ namespace NetworkManager.Model.Topology
             {
                 foreach (var device in devices)
                 {
-                    _devices.Remove(device.Id);
+                    Devices.Remove(device.Id);
                     _generators.Remove(device);
                 }
             }
@@ -183,8 +179,8 @@ namespace NetworkManager.Model.Topology
             {
                 foreach (var deviceIdPair in devicesToConnect)
                 {
-                    _devices[deviceIdPair.Item1].AdjacentDevices.Add(_devices[deviceIdPair.Item2]);
-                    _devices[deviceIdPair.Item2].AdjacentDevices.Add(_devices[deviceIdPair.Item1]);
+                    Devices[deviceIdPair.Item1].AdjacentDevices.Add(Devices[deviceIdPair.Item2]);
+                    Devices[deviceIdPair.Item2].AdjacentDevices.Add(Devices[deviceIdPair.Item1]);
                 }
             }
         }
@@ -199,8 +195,8 @@ namespace NetworkManager.Model.Topology
             {
                 foreach (var deviceIdPair in devicesToDisconnect)
                 {
-                    _devices[deviceIdPair.Item1].AdjacentDevices.Remove(_devices[deviceIdPair.Item2]);
-                    _devices[deviceIdPair.Item2].AdjacentDevices.Remove(_devices[deviceIdPair.Item1]);
+                    Devices[deviceIdPair.Item1].AdjacentDevices.Remove(Devices[deviceIdPair.Item2]);
+                    Devices[deviceIdPair.Item2].AdjacentDevices.Remove(Devices[deviceIdPair.Item1]);
                 }
             }
         }
@@ -214,7 +210,7 @@ namespace NetworkManager.Model.Topology
         private HashSet<Device> OpenDevicesImplementation(ulong[] deviceIDs)
         {
             // Get the devices that actually need to be opened
-            var devicesToOpen = new HashSet<Device>(deviceIDs.Select(id => _devices[id]).Where(d => d.CanConduct));
+            var devicesToOpen = new HashSet<Device>(deviceIDs.Select(id => Devices[id]).Where(d => d.CanConduct));
 
             // This represents to set of devices de-energized by opening the devices passed
             var result = new HashSet<Device>();
@@ -280,7 +276,7 @@ namespace NetworkManager.Model.Topology
 
                 foreach (var id in deviceIDs)
                 {
-                    _devices[id].CanConduct = false;
+                    Devices[id].CanConduct = false;
                 }
 
                 foreach (var d in deenergizedDevices)
@@ -305,7 +301,7 @@ namespace NetworkManager.Model.Topology
         {
             // Get the set of devices we actually need to close
             var devicesToClose = new HashSet<Device>(
-                deviceIDs.Select(id => _devices[id]).Where(d => !d.CanConduct));
+                deviceIDs.Select(id => Devices[id]).Where(d => !d.CanConduct));
 
             return TraverseDepthFirst(
                 // If the device being closed is a generator, or has ay adjacent energized devices, then closing device "x" will cause it to
@@ -352,7 +348,7 @@ namespace NetworkManager.Model.Topology
 
                 foreach (var id in deviceIDs)
                 {
-                    _devices[id].CanConduct = true;
+                    Devices[id].CanConduct = true;
                 }
 
                 foreach (var d in result)
@@ -396,29 +392,25 @@ namespace NetworkManager.Model.Topology
             // Convert devices
             foreach (var d in dto.Devices)
             {
-                _devices.Add(d.Id, new Device
+                Devices.Add(d.Id, new Device
                 {
                     Id = d.Id,
                     Type = deviceTypes[d.DeviceTypeId],
                     AdjacentDevices = new HashSet<Device>(),
                     CanConduct = d.CanConduct,
-                    IsEnergized = false // EnergizeNetwork() calculates this
+                    IsEnergized = d.IsEnergized
                 });
             }
 
             // Connect devices
             Connect(dto.Edges.Select(e => new Tuple<ulong, ulong>(e.lhs, e.rhs)));
-
-            // Energize the network
-
-            EnergizeNetwork();
         }
 
         public void Save(Stream s)
         {
             var dto = new NetworkTopologyDTO();
 
-            dto.DeviceTypes = _devices.Values.Select(d => d.Type).Distinct().Select(dt => new DeviceTypeDTO
+            dto.DeviceTypes = Devices.Values.Select(d => d.Type).Distinct().Select(dt => new DeviceTypeDTO
             {
                 Id = dt.Id,
                 Name = dt.Name,
@@ -427,14 +419,15 @@ namespace NetworkManager.Model.Topology
                 IsServicePoint = dt.IsServicePoint
             }).ToArray();
 
-            dto.Devices = _devices.Values.Select(d => new DeviceDTO
+            dto.Devices = Devices.Values.Select(d => new DeviceDTO
             {
                 Id = d.Id,
                 DeviceTypeId = d.Type.Id,
-                CanConduct = d.CanConduct
+                CanConduct = d.CanConduct,
+                IsEnergized = d.IsEnergized
             }).ToArray();
 
-            dto.Edges = _devices.Values.SelectMany(d => d.AdjacentDevices.Where(ad => ad.Id > d.Id).Select(ad => new EdgeDTO { lhs = d.Id, rhs = ad.Id })).ToArray();
+            dto.Edges = Devices.Values.SelectMany(d => d.AdjacentDevices.Where(ad => ad.Id > d.Id).Select(ad => new EdgeDTO { lhs = d.Id, rhs = ad.Id })).ToArray();
 
             Serializer.Serialize(s, dto);
         }

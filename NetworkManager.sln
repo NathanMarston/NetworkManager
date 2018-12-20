@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.Model", "Net
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.Common", "NetworkManager.Common\NetworkManager.Common.csproj", "{FCA0516E-95F9-4605-B159-7DCA7B65A205}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkManager.TopologyBuilder", "NetworkManager.TopologyBuilder\NetworkManager.TopologyBuilder.csproj", "{DF150B22-7F6C-4C65-AFA8-D63C47EE8FA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.TopologyBuilder", "NetworkManager.TopologyBuilder\NetworkManager.TopologyBuilder.csproj", "{DF150B22-7F6C-4C65-AFA8-D63C47EE8FA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkManager.DTO", "NetworkManager.DTO\NetworkManager.DTO.csproj", "{3705A71F-019E-4768-B3BE-6AB425A01439}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.DTO", "NetworkManager.DTO\NetworkManager.DTO.csproj", "{3705A71F-019E-4768-B3BE-6AB425A01439}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkManager.Web", "NetworkManager.Web\NetworkManager.Web.csproj", "{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{3705A71F-019E-4768-B3BE-6AB425A01439}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3705A71F-019E-4768-B3BE-6AB425A01439}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3705A71F-019E-4768-B3BE-6AB425A01439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
