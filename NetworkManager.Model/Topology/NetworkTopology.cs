@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading;
 using NetworkManager.Common;
+using System.IO;
+using ProtoBuf;
+using NetworkManager.DTO;
 
 namespace NetworkManager.Model.Topology
 {
@@ -123,6 +126,7 @@ namespace NetworkManager.Model.Topology
                     _devices.Values,
                     d => d.IsEnergized = false);
 
+                // Energize everything that's electrically reachable from the active generators on the network
                 Parallel.ForEach(
                     _generators.Where(g => g.CanConduct), // For all energized generators...
                     g => TraverseDepthFirst(
@@ -169,6 +173,10 @@ namespace NetworkManager.Model.Topology
             }
         }
 
+        /// <summary>
+        /// Connect pairs of devices
+        /// </summary>
+        /// <param name="devicesToConnect"></param>
         public void Connect(IEnumerable<Tuple<ulong, ulong>> devicesToConnect)
         {
             using (var scope = _lock.Write())
@@ -181,6 +189,10 @@ namespace NetworkManager.Model.Topology
             }
         }
 
+        /// <summary>
+        /// Disconnect pairs of devices
+        /// </summary>
+        /// <param name="devicesToDisconnect"></param>
         public void Disconnect(IEnumerable<Tuple<ulong, ulong>> devicesToDisconnect)
         {
             using (var scope = _lock.Write())
@@ -238,7 +250,7 @@ namespace NetworkManager.Model.Topology
         }
 
         /// <summary>
-        /// Test opening some devices (without changing the network state)
+        /// Test opening some devices and figure out what parts of the network will be de-energized, without changing the network state
         /// </summary>
         /// <param name="deviceIDs"></param>
         /// <returns>The set of devices de-energized by opening the input devices</returns>
@@ -288,7 +300,7 @@ namespace NetworkManager.Model.Topology
         /// Find the set of devices energized by closing some set of devices
         /// </summary>
         /// <param name="deviceIDs"></param>
-        /// <returns></returns>
+        /// <returns>The set of devices energized by closing the devices</returns>
         private HashSet<Device> CloseDevicesImplementation(ulong[] deviceIDs)
         {
             // Get the set of devices we actually need to close
@@ -311,7 +323,7 @@ namespace NetworkManager.Model.Topology
         /// Test opening some devices
         /// </summary>
         /// <param name="deviceIDs"></param>
-        /// <returns>The set of devices de-energized by opening those devices</returns>
+        /// <returns>The set of devices energized by closing those devices</returns>
         public HashSet<Device> TestClosingDevices(ulong[] deviceIDs)
         {
             using (var scope = _lock.Read())
@@ -327,6 +339,11 @@ namespace NetworkManager.Model.Topology
             }
         }
 
+        /// <summary>
+        /// Close some devices
+        /// </summary>
+        /// <param name="deviceIDs"></param>
+        /// <returns></returns>
         public HashSet<Device> CloseDevices(ulong[] deviceIDs)
         {
             using (var scope = _lock.Write())
@@ -349,5 +366,79 @@ namespace NetworkManager.Model.Topology
             }
         }
         #endregion
+
+        #region Default Constructor
+        public NetworkTopology()
+        {
+
+        }
+        #endregion
+
+        #region Serialization and Deserialization
+        public NetworkTopology(Stream s)
+        {
+            var dto = Serializer.Deserialize<NetworkTopologyDTO>(s);
+
+            // Convert device types
+            var deviceTypes = new Dictionary<ulong, DeviceType>();
+            foreach (var dt in dto.DeviceTypes)
+            {
+                deviceTypes.Add(dt.Id, new DeviceType
+                {
+                    Id = dt.Id,
+                    Name = dt.Name,
+                    IsSwitchable = dt.IsSwitchable,
+                    IsGenerator = dt.IsGenerator,
+                    IsServicePoint = dt.IsServicePoint
+                });
+            }
+
+            // Convert devices
+            foreach (var d in dto.Devices)
+            {
+                _devices.Add(d.Id, new Device
+                {
+                    Id = d.Id,
+                    Type = deviceTypes[d.DeviceTypeId],
+                    AdjacentDevices = new HashSet<Device>(),
+                    CanConduct = d.CanConduct,
+                    IsEnergized = false // EnergizeNetwork() calculates this
+                });
+            }
+
+            // Connect devices
+            Connect(dto.Edges.Select(e => new Tuple<ulong, ulong>(e.lhs, e.rhs)));
+
+            // Energize the network
+
+            EnergizeNetwork();
+        }
+
+        public void Save(Stream s)
+        {
+            var dto = new NetworkTopologyDTO();
+
+            dto.DeviceTypes = _devices.Values.Select(d => d.Type).Distinct().Select(dt => new DeviceTypeDTO
+            {
+                Id = dt.Id,
+                Name = dt.Name,
+                IsSwitchable = dt.IsSwitchable,
+                IsGenerator = dt.IsGenerator,
+                IsServicePoint = dt.IsServicePoint
+            }).ToArray();
+
+            dto.Devices = _devices.Values.Select(d => new DeviceDTO
+            {
+                Id = d.Id,
+                DeviceTypeId = d.Type.Id,
+                CanConduct = d.CanConduct
+            }).ToArray();
+
+            dto.Edges = _devices.Values.SelectMany(d => d.AdjacentDevices.Where(ad => ad.Id > d.Id).Select(ad => new EdgeDTO { lhs = d.Id, rhs = ad.Id })).ToArray();
+
+            Serializer.Serialize(s, dto);
+        }
+        #endregion
+
     }
 }

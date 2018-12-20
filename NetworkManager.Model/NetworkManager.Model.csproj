@@ -6,10 +6,12 @@
 
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NetworkManager.Common\NetworkManager.Common.csproj" />
+    <ProjectReference Include="..\NetworkManager.DTO\NetworkManager.DTO.csproj" />
   </ItemGroup>
 
 </Project>

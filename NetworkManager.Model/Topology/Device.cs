@@ -8,33 +8,28 @@ namespace NetworkManager.Model.Topology
     public class Device
     {
         /// <summary>
-        /// The network topology object that this device belongs to
-        /// </summary>
-        public NetworkTopology Parent { get; internal set; }
-
-        /// <summary>
         /// Unique ID for a device
         /// </summary>
-        public ulong Id { get; internal set; }
+        public ulong Id { get; set; }
 
         /// <summary>
         /// The device's type
         /// </summary>
-        public DeviceType Type { get; internal set; }
+        public DeviceType Type { get; set; }
 
         /// <summary>
         /// The devices which are physically connected to this one
         /// </summary>
-        public HashSet<Device> AdjacentDevices { get; internal set; }
+        public HashSet<Device> AdjacentDevices { get; set; } = new HashSet<Device>();
 
         /// <summary>
         /// Whether this device is currently capable of conducting electricity
         /// </summary>
-        public bool CanConduct { get; internal set; }
+        public bool CanConduct { get; set; }
 
         /// <summary>
         /// Whether this device is currently powered on
         /// </summary>
-        public bool IsEnergized { get; internal set; }
+        public bool IsEnergized { get; set; }
     }
 }
