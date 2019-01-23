@@ -398,7 +398,8 @@ namespace NetworkManager.Model.Topology
                     Type = deviceTypes[d.DeviceTypeId],
                     AdjacentDevices = new HashSet<Device>(),
                     CanConduct = d.CanConduct,
-                    IsEnergized = d.IsEnergized
+                    IsEnergized = d.IsEnergized,
+                    Position = new Geography.LatLng(d.Latitude, d.Longitude)
                 });
             }
 
@@ -424,7 +425,9 @@ namespace NetworkManager.Model.Topology
                 Id = d.Id,
                 DeviceTypeId = d.Type.Id,
                 CanConduct = d.CanConduct,
-                IsEnergized = d.IsEnergized
+                IsEnergized = d.IsEnergized,
+                Latitude = d.Position.Latitude,
+                Longitude = d.Position.Longitude
             }).ToArray();
 
             dto.Edges = Devices.Values.SelectMany(d => d.AdjacentDevices.Where(ad => ad.Id > d.Id).Select(ad => new EdgeDTO { lhs = d.Id, rhs = ad.Id })).ToArray();

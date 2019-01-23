@@ -5,7 +5,7 @@ namespace NetworkManager.Model.Topology
     /// <summary>
     /// Represents a single device in a network model
     /// </summary>
-    public class Device
+    public partial class Device
     {
         /// <summary>
         /// Unique ID for a device

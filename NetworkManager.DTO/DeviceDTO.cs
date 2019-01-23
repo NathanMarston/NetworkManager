@@ -9,5 +9,7 @@ namespace NetworkManager.DTO
         [ProtoMember(2)] public ulong DeviceTypeId;
         [ProtoMember(3)] public bool CanConduct;
         [ProtoMember(4)] public bool IsEnergized;
+        [ProtoMember(5)] public float Latitude;
+        [ProtoMember(6)] public float Longitude;
     }
 }

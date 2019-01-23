@@ -54,7 +54,15 @@ namespace NetworkManager.Web.Controllers
             if (topology.Devices.ContainsKey(id))
             {
                 var device = topology.Devices[id];
-                return new DeviceDTO { Id = device.Id, DeviceTypeId = device.Type.Id, CanConduct = device.CanConduct, IsEnergized = device.IsEnergized };
+                return new DeviceDTO
+                {
+                    Id = device.Id,
+                    DeviceTypeId = device.Type.Id,
+                    CanConduct = device.CanConduct,
+                    IsEnergized = device.IsEnergized,
+                    Latitude = device.Position.Latitude,
+                    Longitude = device.Position.Longitude
+                };
             }
             else
             {
@@ -71,7 +79,15 @@ namespace NetworkManager.Web.Controllers
         public ActionResult<DeviceDTO[]> TestOpeningDevices([FromQuery] ulong[] ids)
         {
             var result = topology.TestOpeningDevices(ids);
-            return result.Select(d => new DeviceDTO { Id = d.Id, DeviceTypeId = d.Type.Id, CanConduct = d.CanConduct, IsEnergized = d.IsEnergized }).ToArray();
+            return result.Select(d => new DeviceDTO
+            {
+                Id = d.Id,
+                DeviceTypeId = d.Type.Id,
+                CanConduct = d.CanConduct,
+                IsEnergized = d.IsEnergized,
+                Latitude = d.Position.Latitude,
+                Longitude = d.Position.Longitude
+            }).ToArray();
         }
 
         /// <summary>
@@ -83,7 +99,15 @@ namespace NetworkManager.Web.Controllers
         public ActionResult<DeviceDTO[]> TestClosingDevices([FromQuery] ulong[] ids)
         {
             var result = topology.TestClosingDevices(ids);
-            return result.Select(d => new DeviceDTO { Id = d.Id, DeviceTypeId = d.Type.Id, CanConduct = d.CanConduct, IsEnergized = d.IsEnergized }).ToArray();
+            return result.Select(d => new DeviceDTO
+            {
+                Id = d.Id,
+                DeviceTypeId = d.Type.Id,
+                CanConduct = d.CanConduct,
+                IsEnergized = d.IsEnergized,
+                Latitude = d.Position.Latitude,
+                Longitude = d.Position.Longitude
+            }).ToArray();
         }
 
         /// <summary>
@@ -95,7 +119,15 @@ namespace NetworkManager.Web.Controllers
         public ActionResult<DeviceDTO[]> OpenDevices([FromQuery] ulong[] ids)
         {
             var result = topology.OpenDevices(ids);
-            return result.Select(d => new DeviceDTO { Id = d.Id, DeviceTypeId = d.Type.Id, CanConduct = d.CanConduct, IsEnergized = d.IsEnergized }).ToArray();
+            return result.Select(d => new DeviceDTO
+            {
+                Id = d.Id,
+                DeviceTypeId = d.Type.Id,
+                CanConduct = d.CanConduct,
+                IsEnergized = d.IsEnergized,
+                Latitude = d.Position.Latitude,
+                Longitude = d.Position.Longitude
+            }).ToArray();
         }
 
         /// <summary>

@@ -51,17 +51,18 @@ namespace NetworkManager.TopologyBuilder
 
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = "select mslink, feature_id, normal_status from oms_connectivity";
+                command.CommandText = "select mslink, feature_id, normal_status, x_coord, y_coord from oms_connectivity where x_coord is not null and y_coord is not null";
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
-                    {
+                    { 
                         yield return new Device
                         {
                             Id = ulong.Parse(reader["mslink"].ToString()),
                             Type = deviceTypes[ulong.Parse(reader["feature_id"].ToString())],
-                            CanConduct = reader["normal_status"].ToString() == "C"
+                            CanConduct = reader["normal_status"].ToString() == "C",
+                            Position = new Model.Geography.LatLng(long.Parse(reader["x_coord"].ToString()), long.Parse(reader["y_coord"].ToString()))
                         };
                     }
                 }
@@ -90,7 +91,11 @@ namespace NetworkManager.TopologyBuilder
                     or decode(lhs.node2,0,null, lhs.node2) = decode(rhs.node2,0,null, rhs.node2)
                   )
                 where
-                  lhs.mslink<rhs.mslink";
+                  lhs.mslink<rhs.mslink
+                and lhs.x_coord is not null
+                and lhs.y_coord is not null
+                and rhs.x_coord is not null
+                and rhs.y_coord is not null";
 
                 using (var reader = command.ExecuteReader())
                 {
