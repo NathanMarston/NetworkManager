@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.TopologyBuil
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.DTO", "NetworkManager.DTO\NetworkManager.DTO.csproj", "{3705A71F-019E-4768-B3BE-6AB425A01439}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkManager.Web", "NetworkManager.Web\NetworkManager.Web.csproj", "{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.WebService", "NetworkManager.Web\NetworkManager.WebService.csproj", "{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkManager.WebApp", "NetworkManager.WebApp\NetworkManager.WebApp.csproj", "{47406E2C-B31F-4EDF-A7B3-05864DAF293E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD3C2B2F-D2FC-4AD9-9EE1-1A052D6F4FBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47406E2C-B31F-4EDF-A7B3-05864DAF293E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47406E2C-B31F-4EDF-A7B3-05864DAF293E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47406E2C-B31F-4EDF-A7B3-05864DAF293E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47406E2C-B31F-4EDF-A7B3-05864DAF293E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

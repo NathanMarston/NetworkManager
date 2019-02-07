@@ -12,16 +12,16 @@ namespace NetworkManager.Web.Controllers
     public class TopologyController : ControllerBase
     {
         // Static so it can be shared across controllers within the same worker process
-        public static NetworkTopology topology;
+        public static NetworkTopology Topology { get; set; }
 
         public TopologyController(IConfiguration configuration)
         {
-            if (topology == null)
+            if (Topology == null)
             {
                 var path = configuration["NetworkTopology:Path"];
                 using (var fs = new FileStream(path, FileMode.Open))
                 {
-                    topology = new NetworkTopology(fs);
+                    Topology = new NetworkTopology(fs);
                 }
             }
         }
@@ -33,7 +33,7 @@ namespace NetworkManager.Web.Controllers
         [HttpGet("DeviceTypes")]
         public DeviceTypeDTO[] GetDeviceTypes()
         {
-            return topology.Devices.Values.Select(d => d.Type).Distinct().Select(dt => new DeviceTypeDTO
+            return Topology.Devices.Values.Select(d => d.Type).Distinct().Select(dt => new DeviceTypeDTO
             {
                 Id = dt.Id,
                 Name = dt.Name,
@@ -51,9 +51,9 @@ namespace NetworkManager.Web.Controllers
         [HttpGet("{id}")]
         public ActionResult<DeviceDTO> GetDeviceById(ulong id)
         {
-            if (topology.Devices.ContainsKey(id))
+            if (Topology.Devices.ContainsKey(id))
             {
-                var device = topology.Devices[id];
+                var device = Topology.Devices[id];
                 return new DeviceDTO
                 {
                     Id = device.Id,
@@ -78,7 +78,7 @@ namespace NetworkManager.Web.Controllers
         [HttpGet("TestOpeningDevices")]
         public ActionResult<DeviceDTO[]> TestOpeningDevices([FromQuery] ulong[] ids)
         {
-            var result = topology.TestOpeningDevices(ids);
+            var result = Topology.TestOpeningDevices(ids);
             return result.Select(d => new DeviceDTO
             {
                 Id = d.Id,
@@ -98,7 +98,7 @@ namespace NetworkManager.Web.Controllers
         [HttpGet("TestClosingDevices")]
         public ActionResult<DeviceDTO[]> TestClosingDevices([FromQuery] ulong[] ids)
         {
-            var result = topology.TestClosingDevices(ids);
+            var result = Topology.TestClosingDevices(ids);
             return result.Select(d => new DeviceDTO
             {
                 Id = d.Id,
@@ -118,7 +118,7 @@ namespace NetworkManager.Web.Controllers
         [HttpPut("OpenDevices")]
         public ActionResult<DeviceDTO[]> OpenDevices([FromQuery] ulong[] ids)
         {
-            var result = topology.OpenDevices(ids);
+            var result = Topology.OpenDevices(ids);
             return result.Select(d => new DeviceDTO
             {
                 Id = d.Id,
@@ -138,7 +138,7 @@ namespace NetworkManager.Web.Controllers
         [HttpPut("CloseDevices")]
         public ActionResult<DeviceDTO[]> CloseDevices([FromQuery] ulong[] ids)
         {
-            var result = topology.CloseDevices(ids);
+            var result = Topology.CloseDevices(ids);
             return result.Select(d => new DeviceDTO { Id = d.Id, DeviceTypeId = d.Type.Id, CanConduct = d.CanConduct, IsEnergized = d.IsEnergized }).ToArray();
         }
     }
