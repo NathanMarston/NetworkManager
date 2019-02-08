@@ -8,6 +8,7 @@ using NetworkManager.Web.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Topshelf;
 
 namespace NetworkManager.ServiceHost
@@ -49,27 +50,36 @@ namespace NetworkManager.ServiceHost
     {
         private IWebHost _host;
 
-        public NetworkManagerService(NetworkTopology topology)
+        public NetworkManagerService()
         {
             // Spin the host up
             _host = new WebHostBuilder()
                 .UseKestrel()
                 .UseStartup<Startup>()
                 .Build();
-
-            // Configure the controllers
-            TopologyController.Topology = topology;
-            GeographyController.Geography = new NetworkGeography(topology);
         }
 
-        public void Start()
+        public void LoadDependencies(string networkModelPath)
+        {
+            Console.WriteLine("Loading network model...");
+            using (var fs = new FileStream(networkModelPath, FileMode.Open))
+            {
+                var model = new NetworkTopology(fs);
+                TopologyController.Topology = model;
+                GeographyController.Geography = new NetworkGeography(model);
+            }
+            Console.WriteLine("Network model loaded!");
+            _host.Start();
+        }
+
+        public void StartService(string networkModelPath)
         {
             // Start responding to requests
-            _host.Run();
             Console.WriteLine("Service Started");
+            Task.Run(() => LoadDependencies(networkModelPath));
         }
 
-        public void Stop()
+        public void StopService()
         {
             // Stop responding to requests
             Console.WriteLine("Service Stopping");
@@ -86,32 +96,27 @@ namespace NetworkManager.ServiceHost
             var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
             var config = builder.Build();
 
-            // Pull in the network topology object
+            // Pull in the network model
             var networkModelPath = config["AppSettings:NetworkModelPath"];
-            using (var fs = new FileStream(networkModelPath, FileMode.Open))
+            var service = new NetworkManagerService();
+
+            var rc = HostFactory.Run(x =>
             {
-                Console.WriteLine("Loading Network Topology...");
-                var networkTopology = new NetworkTopology(fs);
-                Console.WriteLine("Network Topology Loaded");
-
-                var rc = HostFactory.Run(x =>
+                x.Service<NetworkManagerService>(s =>
                 {
-                    x.Service<NetworkManagerService>(s =>
-                    {
-                        s.ConstructUsing(name => new NetworkManagerService(networkTopology));
-                        s.WhenStarted(tc => tc.Start());
-                        s.WhenStopped(tc => tc.Stop());
-                    });
-                    x.RunAsLocalSystem();
-
-                    x.SetDescription("NetworkManager Self-Hosted REST API");
-                    x.SetDisplayName("NetworkManager.ServiceHost");
-                    x.SetServiceName("NetworkManager.ServiceHost");
+                    s.ConstructUsing(name => service);
+                    s.WhenStarted(tc => tc.StartService(networkModelPath));
+                    s.WhenStopped(tc => tc.StopService());
                 });
+                x.RunAsLocalSystem();
 
-                var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
-                Environment.ExitCode = exitCode;
-            }
+                x.SetDescription("NetworkManager Self-Hosted REST API");
+                x.SetDisplayName("NetworkManager.ServiceHost");
+                x.SetServiceName("NetworkManager.ServiceHost");
+            });
+
+            var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
+            Environment.ExitCode = exitCode;
         }
     }
 }

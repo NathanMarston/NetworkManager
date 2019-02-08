@@ -1,10 +1,12 @@
 ﻿using log4net;
+using log4net.Config;
 using NetworkManager.Model.Topology;
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Reflection;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -109,6 +111,10 @@ namespace NetworkManager.TopologyBuilder
 
         static void Main(string[] args)
         {
+            // Configure Log4Net
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
             log.Info("NetworkManager Topology Builder Starting");
             using (var connection = new OracleConnection(ConfigurationManager.ConnectionStrings["OMS"].ConnectionString))
             {
